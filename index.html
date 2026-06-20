@@ -484,25 +484,81 @@ cite{font-style:normal;color:var(--teal);font-weight:500}
         </div>
         <div class="art-tags"><span class="badge badge-ink">Desmos</span><span class="badge badge-ink">ICT Integration</span><span class="badge badge-ink">Functions</span><span class="badge badge-slate">Year 11 Advanced</span></div>
         <div class="art-body">I built this Desmos activity during CRS514 as a resource I plan to use when I teach Year 11 Advanced Mathematics. The activity lets students drag sliders for <em>a</em>, <em>h</em> and <em>k</em> in <em>y = af(x − h) + k</em> and watch the graph shift in real time, rather than copying three static examples from the board. The idea is that students will actually see what each parameter does, not just memorise what they're supposed to do. I haven't used this in a Stage 6 classroom yet, but it's grounded in <cite>Chechan et al. (2023)</cite>, who found measurable gains when technology was built properly into a lesson sequence rather than used as a demonstration.</div>
-        <div class="art-diagram">
-          <svg viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
-            <line x1="40" y1="200" x2="640" y2="200" stroke="#94A3B8" stroke-width="1"/>
-            <line x1="340" y1="360" x2="340" y2="40" stroke="#94A3B8" stroke-width="1"/>
-            <text x="625" y="194" font-size="12" fill="#64748B">x</text>
-            <text x="348" y="52" font-size="12" fill="#64748B">y</text>
-            <g stroke="#CBD5E1" stroke-width="0.5">
-              <line x1="100" y1="40" x2="100" y2="360"/><line x1="160" y1="40" x2="160" y2="360"/><line x1="220" y1="40" x2="220" y2="360"/><line x1="280" y1="40" x2="280" y2="360"/>
-              <line x1="400" y1="40" x2="400" y2="360"/><line x1="460" y1="40" x2="460" y2="360"/><line x1="520" y1="40" x2="520" y2="360"/><line x1="580" y1="40" x2="580" y2="360"/>
-              <line x1="40" y1="100" x2="640" y2="100"/><line x1="40" y1="150" x2="640" y2="150"/><line x1="40" y1="250" x2="640" y2="250"/><line x1="40" y1="300" x2="640" y2="300"/>
-            </g>
-            <path d="M 160 320 Q 340 40 520 320" fill="none" stroke="#CBD5E1" stroke-width="1.5"/>
-            <path d="M 280 340 Q 400 110 520 340" fill="none" stroke="#0EA5A0" stroke-width="3"/>
-            <circle cx="400" cy="160" r="5" fill="#0EA5A0"/>
-            <text x="420" y="110" font-size="13" font-weight="600" fill="#0F6B66">y = 2(x − 2)² + 1</text>
-            <text x="420" y="128" font-size="11" fill="#64748B">a=2, h=2, k=1</text>
-            <text x="165" y="318" font-size="11" fill="#94A3B8">y = x² (base)</text>
-          </svg>
-          <div class="art-diagram-caption">Dragging the slider for <em>a</em>, <em>h</em> or <em>k</em> moves the teal curve in real time — students see the effect of each parameter as they adjust it</div>
+        <div class="art-diagram" style="padding:0;background:#F8FAFC;border-radius:10px;overflow:hidden">
+          <div style="padding:16px 20px 8px;background:#F8FAFC">
+            <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:10px;align-items:center">
+              <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px">
+                <label style="font-size:11px;font-weight:700;color:#0F6B66;letter-spacing:.06em">a = <span id="av">2</span></label>
+                <input id="sa" type="range" min="-3" max="3" step="0.1" value="2" style="width:100%;accent-color:#0EA5A0">
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px">
+                <label style="font-size:11px;font-weight:700;color:#92400E;letter-spacing:.06em">h = <span id="hv">2</span></label>
+                <input id="sh" type="range" min="-4" max="4" step="0.5" value="2" style="width:100%;accent-color:#F59E0B">
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px">
+                <label style="font-size:11px;font-weight:700;color:#1D4ED8;letter-spacing:.06em">k = <span id="kv">1</span></label>
+                <input id="sk" type="range" min="-3" max="3" step="0.5" value="1" style="width:100%;accent-color:#3B82F6">
+              </div>
+            </div>
+            <div style="font-size:13px;font-weight:600;color:#0D1B2A;text-align:center;margin-bottom:8px">
+              y = <span id="eq" style="color:#0EA5A0">2(x − 2)² + 1</span>
+            </div>
+          </div>
+          <canvas id="gc1" width="640" height="300" style="width:100%;display:block;background:#fff;border-top:1px solid #E2E8F0"></canvas>
+          <div class="art-diagram-caption" style="padding:10px 20px 14px">Drag the sliders — the teal curve updates in real time showing how each parameter changes the parabola</div>
+          <script>
+          (function(){
+            var c=document.getElementById('gc1'),ctx=c.getContext('2d');
+            var W=640,H=300,cx=W/2,cy=H/2,sc=40;
+            function draw(){
+              var a=+document.getElementById('sa').value;
+              var h=+document.getElementById('sh').value;
+              var k=+document.getElementById('sk').value;
+              document.getElementById('av').textContent=a.toFixed(1);
+              document.getElementById('hv').textContent=h.toFixed(1);
+              document.getElementById('kv').textContent=k.toFixed(1);
+              var hs=h>=0?'(x − '+h+')':('(x + '+Math.abs(h)+')');
+              var ks=k>=0?'+ '+k:'− '+Math.abs(k);
+              document.getElementById('eq').textContent=a.toFixed(1)+hs+'² '+ks;
+              ctx.clearRect(0,0,W,H);
+              // grid
+              ctx.strokeStyle='#F1F5F9';ctx.lineWidth=1;
+              for(var x=-8;x<=8;x++){ctx.beginPath();ctx.moveTo(cx+x*sc,0);ctx.lineTo(cx+x*sc,H);ctx.stroke();}
+              for(var y=-4;y<=4;y++){ctx.beginPath();ctx.moveTo(0,cy-y*sc);ctx.lineTo(W,cy-y*sc);ctx.stroke();}
+              // axes
+              ctx.strokeStyle='#94A3B8';ctx.lineWidth=1.5;
+              ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(W,cy);ctx.stroke();
+              ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,H);ctx.stroke();
+              ctx.fillStyle='#94A3B8';ctx.font='11px Inter,sans-serif';
+              ctx.fillText('x',W-14,cy-6);ctx.fillText('y',cx+6,14);
+              // base y=x²
+              ctx.strokeStyle='#CBD5E1';ctx.lineWidth=1.5;ctx.beginPath();
+              var first=true;
+              for(var px=0;px<=W;px++){
+                var xv=(px-cx)/sc,yv=xv*xv,py=cy-yv*sc;
+                if(first){ctx.moveTo(px,py);first=false;}else ctx.lineTo(px,py);
+              }
+              ctx.stroke();
+              ctx.fillStyle='#94A3B8';ctx.font='11px Inter';ctx.fillText('y = x² (base)',cx+4,cy-sc*4.2>10?cy-sc*4.2:14);
+              // transformed
+              ctx.strokeStyle='#0EA5A0';ctx.lineWidth=3;ctx.beginPath();first=true;
+              for(var px=0;px<=W;px++){
+                var xv=(px-cx)/sc,yv=a*(xv-h)*(xv-h)+k,py=cy-yv*sc;
+                if(py<-H||py>2*H){first=true;continue;}
+                if(first){ctx.moveTo(px,py);first=false;}else ctx.lineTo(px,py);
+              }
+              ctx.stroke();
+              // vertex dot
+              var vx=cx+h*sc,vy=cy-k*sc;
+              if(vx>=0&&vx<=W&&vy>=0&&vy<=H){
+                ctx.beginPath();ctx.arc(vx,vy,5,0,Math.PI*2);
+                ctx.fillStyle='#0EA5A0';ctx.fill();
+              }
+            }
+            ['sa','sh','sk'].forEach(function(id){document.getElementById(id).addEventListener('input',draw);});
+            draw();
+          })();
+          </script>
         </div>
         <div class="annotation">
           <div class="ann-header"><div class="ann-icon">📚</div><div class="ann-label">Research Annotation</div></div>
@@ -538,36 +594,67 @@ cite{font-style:normal;color:var(--teal);font-weight:500}
         </div>
         <div class="art-tags"><span class="badge badge-ink">Calculus</span><span class="badge badge-ink">Scope &amp; Sequence</span><span class="badge badge-slate">Year 11–12 Advanced</span><span class="badge badge-slate">Curriculum Planning</span></div>
         <div class="art-body">This is a planning resource I've developed as preparation for teaching Stage 6 — a scope and sequence mapping how the calculus strand runs across Year 11 and Year 12 Advanced Mathematics, identifying where the prerequisite dependencies sit and which topics students typically struggle with when they haven't fully consolidated what came before. I built this during CRS514 to develop the kind of content sequencing knowledge that <cite>Schüler-Meyer et al. (2024)</cite> calls pedagogical content knowledge — understanding not just what the content is, but the order that makes it learnable and the points where it usually breaks down.</div>
-        <div class="art-diagram">
-          <svg viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
-            <rect x="40" y="20" width="600" height="148" rx="16" fill="#E0F7F6" stroke="#0EA5A0" stroke-width="1"/>
-            <text x="60" y="44" font-size="13" font-weight="600" fill="#0F6B66">Year 11 Advanced — Calculus foundations</text>
-            <rect x="60" y="60" width="150" height="52" rx="10" fill="#fff" stroke="#0EA5A0" stroke-width="1"/>
-            <text x="135" y="82" font-size="12" font-weight="600" fill="#0F6B66" text-anchor="middle">Limits</text>
-            <text x="135" y="100" font-size="10.5" fill="#64748B" text-anchor="middle">Approaching a value</text>
-            <rect x="245" y="60" width="175" height="52" rx="10" fill="#fff" stroke="#0EA5A0" stroke-width="1"/>
-            <text x="332" y="82" font-size="12" font-weight="600" fill="#0F6B66" text-anchor="middle">Differentiation</text>
-            <text x="332" y="100" font-size="10.5" fill="#64748B" text-anchor="middle">Power, product, chain rule</text>
-            <rect x="455" y="60" width="165" height="52" rx="10" fill="#fff" stroke="#0EA5A0" stroke-width="1"/>
-            <text x="537" y="82" font-size="12" font-weight="600" fill="#0F6B66" text-anchor="middle">Curve sketching</text>
-            <text x="537" y="100" font-size="10.5" fill="#64748B" text-anchor="middle">Stationary points</text>
-            <line x1="210" y1="86" x2="243" y2="86" stroke="#0EA5A0" stroke-width="1.5"/>
-            <line x1="420" y1="86" x2="453" y2="86" stroke="#0EA5A0" stroke-width="1.5"/>
-            <line x1="340" y1="168" x2="340" y2="210" stroke="#94A3B8" stroke-width="1.5"/>
-            <text x="350" y="192" font-size="10.5" fill="#64748B">leads into</text>
-            <rect x="40" y="212" width="600" height="148" rx="16" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
-            <text x="60" y="236" font-size="13" font-weight="600" fill="#92400E">Year 12 Advanced — Calculus applications</text>
-            <rect x="60" y="252" width="160" height="52" rx="10" fill="#fff" stroke="#F59E0B" stroke-width="1"/>
-            <text x="140" y="274" font-size="12" font-weight="600" fill="#92400E" text-anchor="middle">Integration</text>
-            <text x="140" y="292" font-size="10.5" fill="#64748B" text-anchor="middle">Anti-differentiation</text>
-            <rect x="250" y="252" width="185" height="52" rx="10" fill="#fff" stroke="#F59E0B" stroke-width="1"/>
-            <text x="342" y="274" font-size="12" font-weight="600" fill="#92400E" text-anchor="middle">Areas &amp; volumes</text>
-            <text x="342" y="292" font-size="10.5" fill="#64748B" text-anchor="middle">Definite integrals</text>
-            <rect x="465" y="252" width="155" height="52" rx="10" fill="#fff" stroke="#F59E0B" stroke-width="1"/>
-            <text x="542" y="274" font-size="12" font-weight="600" fill="#92400E" text-anchor="middle">Rates of change</text>
-            <text x="542" y="292" font-size="10.5" fill="#64748B" text-anchor="middle">Real-world contexts</text>
-          </svg>
-          <div class="art-diagram-caption">Mapping the calculus strand helps me plan which Year 11 gaps to close before they become Year 12 problems</div>
+                <div class="art-diagram" style="padding:0;background:#F8FAFC;border-radius:10px;overflow:hidden">
+          <div style="padding:12px 16px 8px;background:#FEF3C7;border-bottom:1px solid #F59E0B22">
+            <p style="font-size:11.5px;color:#92400E;margin:0">🔍 Click any topic node to see why it matters and common student errors</p>
+          </div>
+          <div id="cmap" style="padding:16px;position:relative;min-height:280px">
+            <svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+              <rect x="40" y="10" width="600" height="120" rx="14" fill="#E0F7F6" stroke="#0EA5A0" stroke-width="1"/>
+              <text x="60" y="34" font-size="12" font-weight="600" fill="#0F6B66">Year 11 — Foundations</text>
+              <rect id="n1" x="60" y="48" width="140" height="48" rx="9" fill="#fff" stroke="#0EA5A0" stroke-width="1.5" style="cursor:pointer"/>
+              <text x="130" y="68" font-size="11.5" font-weight="600" fill="#0F6B66" text-anchor="middle" style="pointer-events:none">Limits</text>
+              <text x="130" y="85" font-size="10" fill="#64748B" text-anchor="middle" style="pointer-events:none">Approaching a value</text>
+              <rect id="n2" x="240" y="48" width="160" height="48" rx="9" fill="#fff" stroke="#0EA5A0" stroke-width="1.5" style="cursor:pointer"/>
+              <text x="320" y="68" font-size="11.5" font-weight="600" fill="#0F6B66" text-anchor="middle" style="pointer-events:none">Differentiation</text>
+              <text x="320" y="85" font-size="10" fill="#64748B" text-anchor="middle" style="pointer-events:none">Power, product, chain rule</text>
+              <rect id="n3" x="440" y="48" width="160" height="48" rx="9" fill="#fff" stroke="#0EA5A0" stroke-width="1.5" style="cursor:pointer"/>
+              <text x="520" y="68" font-size="11.5" font-weight="600" fill="#0F6B66" text-anchor="middle" style="pointer-events:none">Curve Sketching</text>
+              <text x="520" y="85" font-size="10" fill="#64748B" text-anchor="middle" style="pointer-events:none">Stationary points</text>
+              <line x1="200" y1="72" x2="238" y2="72" stroke="#0EA5A0" stroke-width="1.5"/>
+              <line x1="400" y1="72" x2="438" y2="72" stroke="#0EA5A0" stroke-width="1.5"/>
+              <line x1="340" y1="140" x2="340" y2="168" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <rect x="40" y="170" width="600" height="120" rx="14" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
+              <text x="60" y="194" font-size="12" font-weight="600" fill="#92400E">Year 12 — Applications</text>
+              <rect id="n4" x="60" y="208" width="150" height="48" rx="9" fill="#fff" stroke="#F59E0B" stroke-width="1.5" style="cursor:pointer"/>
+              <text x="135" y="228" font-size="11.5" font-weight="600" fill="#92400E" text-anchor="middle" style="pointer-events:none">Integration</text>
+              <text x="135" y="245" font-size="10" fill="#64748B" text-anchor="middle" style="pointer-events:none">Anti-differentiation</text>
+              <rect id="n5" x="245" y="208" width="180" height="48" rx="9" fill="#fff" stroke="#F59E0B" stroke-width="1.5" style="cursor:pointer"/>
+              <text x="335" y="228" font-size="11.5" font-weight="600" fill="#92400E" text-anchor="middle" style="pointer-events:none">Applications</text>
+              <text x="335" y="245" font-size="10" fill="#64748B" text-anchor="middle" style="pointer-events:none">Optimisation, rates</text>
+              <rect id="n6" x="460" y="208" width="150" height="48" rx="9" fill="#fff" stroke="#F59E0B" stroke-width="1.5" style="cursor:pointer"/>
+              <text x="535" y="228" font-size="11.5" font-weight="600" fill="#92400E" text-anchor="middle" style="pointer-events:none">Rates of Change</text>
+              <text x="535" y="245" font-size="10" fill="#64748B" text-anchor="middle" style="pointer-events:none">Real-world contexts</text>
+            </svg>
+            <div id="cmap-info" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;padding:14px 18px;max-width:280px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:10;min-width:220px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span id="cmap-title" style="font-size:13px;font-weight:700;color:#0D1B2A"></span>
+                <button onclick="document.getElementById('cmap-info').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:16px;color:#94A3B8;line-height:1">✕</button>
+              </div>
+              <p id="cmap-body" style="font-size:12.5px;color:#64748B;margin:0;line-height:1.6"></p>
+            </div>
+          </div>
+          <div class="art-diagram-caption" style="padding:6px 16px 12px">Click any node — the map shows prerequisite chains and common misconceptions at each stage</div>
+          <script>
+          (function(){
+            var info={
+              n1:{t:"Limits",b:"Foundation concept — students often confuse 'approaching' with 'equalling'. Must be secure before derivatives make sense."},
+              n2:{t:"Differentiation",b:"Most common error: forgetting the chain rule on composite functions. This misconception compounds through Year 12."},
+              n3:{t:"Curve Sketching",b:"Requires differentiation AND algebraic reasoning. Students who rush struggle to interpret what stationary points mean physically."},
+              n4:{t:"Integration",b:"Biggest conceptual leap — reversing the differentiation process. Students who see it as just 'the opposite' often can't apply it to areas."},
+              n5:{t:"Applications",b:"Optimisation problems expose gaps in function modelling skills. Students must be able to construct functions, not just differentiate given ones."},
+              n6:{t:"Rates of Change",b:"Context-heavy — EAL/D students in particular need language scaffolding. Mathematical skill is often there; reading comprehension trips them up."}
+            };
+            Object.keys(info).forEach(function(id){
+              document.getElementById(id).addEventListener('click',function(e){
+                var d=document.getElementById('cmap-info');
+                document.getElementById('cmap-title').textContent=info[id].t;
+                document.getElementById('cmap-body').textContent=info[id].b;
+                d.style.display='block';
+              });
+            });
+          })();
+          </script>
         </div>
         <div class="annotation">
           <div class="ann-header"><div class="ann-icon">📚</div><div class="ann-label">Research Annotation</div></div>
@@ -602,32 +689,46 @@ cite{font-style:normal;color:var(--teal);font-weight:500}
         </div>
         <div class="art-tags"><span class="badge badge-ink">Differentiation</span><span class="badge badge-ink">EAL/D</span><span class="badge badge-rose">Merrylands HS</span><span class="badge badge-slate">Year 9 · Stage 5</span></div>
         <div class="art-body">This came directly out of a problem I ran into at Merrylands. My 9Maths5 class had students who weren't yet confident with basic two-step arithmetic sitting alongside students who could already handle multi-step algebra — and a large chunk of the class were EAL/D learners who needed clearer language, not harder maths. I built three versions of the same worksheet: scaffolded with a worked example and guided steps, standard with independent practice, and extension with multi-step reasoning questions. <cite>Insorio (2024)</cite> call this enabling and extending prompts — I came across the term after I'd already tried the approach, and the research confirmed what I'd worked out through trial and error.</div>
-        <div class="art-diagram">
-          <svg viewBox="0 0 680 310" xmlns="http://www.w3.org/2000/svg">
-            <rect x="220" y="20" width="240" height="52" rx="10" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1"/>
-            <text x="340" y="42" font-size="13" font-weight="600" fill="#334155" text-anchor="middle">Core skill</text>
-            <text x="340" y="60" font-size="11" fill="#64748B" text-anchor="middle">Solving two-step linear equations</text>
-            <line x1="280" y1="72" x2="140" y2="118" stroke="#94A3B8" stroke-width="1.2"/>
-            <line x1="340" y1="72" x2="340" y2="118" stroke="#94A3B8" stroke-width="1.2"/>
-            <line x1="400" y1="72" x2="540" y2="118" stroke="#94A3B8" stroke-width="1.2"/>
-            <rect x="40" y="118" width="200" height="158" rx="12" fill="#E0F7F6" stroke="#0EA5A0" stroke-width="1"/>
-            <text x="140" y="146" font-size="14" font-weight="600" fill="#0F6B66" text-anchor="middle">Scaffolded</text>
-            <text x="140" y="170" font-size="11" fill="#0F6B66" text-anchor="middle">Worked example first</text>
-            <text x="140" y="188" font-size="11" fill="#0F6B66" text-anchor="middle">Guided steps provided</text>
-            <text x="140" y="214" font-size="11" fill="#0F6B66" text-anchor="middle">Visual cues &amp; simpler</text>
-            <text x="140" y="232" font-size="11" fill="#0F6B66" text-anchor="middle">language for EAL/D</text>
-            <rect x="240" y="118" width="200" height="158" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1"/>
-            <text x="340" y="146" font-size="14" font-weight="600" fill="#1D4ED8" text-anchor="middle">Standard</text>
-            <text x="340" y="170" font-size="11" fill="#1D4ED8" text-anchor="middle">Independent practice</text>
-            <text x="340" y="188" font-size="11" fill="#1D4ED8" text-anchor="middle">Mixed question types</text>
-            <text x="340" y="214" font-size="11" fill="#1D4ED8" text-anchor="middle">No scaffolding</text>
-            <rect x="440" y="118" width="200" height="158" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
-            <text x="540" y="146" font-size="14" font-weight="600" fill="#92400E" text-anchor="middle">Extension</text>
-            <text x="540" y="170" font-size="11" fill="#92400E" text-anchor="middle">Multi-step reasoning</text>
-            <text x="540" y="188" font-size="11" fill="#92400E" text-anchor="middle">Word problems &amp;</text>
-            <text x="540" y="206" font-size="11" fill="#92400E" text-anchor="middle">algebraic thinking</text>
-          </svg>
-          <div class="art-diagram-caption">Same learning outcome, three entry points — nobody gets easier maths, they just get a different door into the same room</div>
+                <div class="art-diagram" style="padding:0;background:#F8FAFC;border-radius:10px;overflow:hidden">
+          <div style="padding:12px 16px 8px;background:#F1EBFF;border-bottom:1px solid #8B5CF622">
+            <p style="font-size:11.5px;color:#6D28D9;margin:0">📝 Click each tier to see sample questions from the actual worksheet</p>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-bottom:1px solid #E2E8F0">
+            <button id="tw1" onclick="showTier(1)" style="padding:16px 10px;background:#E0F7F6;border:none;border-right:1px solid #E2E8F0;cursor:pointer;font-weight:600;font-size:13px;color:#0F6B66;transition:.15s">🟢 Scaffolded</button>
+            <button id="tw2" onclick="showTier(2)" style="padding:16px 10px;background:#EFF6FF;border:none;border-right:1px solid #E2E8F0;cursor:pointer;font-weight:600;font-size:13px;color:#1D4ED8;transition:.15s">🔵 Standard</button>
+            <button id="tw3" onclick="showTier(3)" style="padding:16px 10px;background:#FEF3C7;border:none;cursor:pointer;font-weight:600;font-size:13px;color:#92400E;transition:.15s">🟡 Extension</button>
+          </div>
+          <div id="tier-content" style="padding:18px 20px;min-height:140px">
+            <div id="tc1" style="display:block">
+              <p style="font-size:12px;font-weight:700;color:#0F6B66;margin-bottom:10px">Scaffolded tier — worked example provided, then guided steps</p>
+              <p style="font-size:13px;color:#334155;margin-bottom:8px"><strong>Example:</strong> Solve 2x + 3 = 11</p>
+              <p style="font-size:12px;color:#64748B;margin-bottom:4px">Step 1: Subtract 3 from both sides → 2x = ____</p>
+              <p style="font-size:12px;color:#64748B;margin-bottom:12px">Step 2: Divide both sides by 2 → x = ____</p>
+              <p style="font-size:13px;color:#334155"><strong>Q1.</strong> Solve 3x + 5 = 14 &nbsp; <em>(fill in the steps above)</em></p>
+              <p style="font-size:13px;color:#334155"><strong>Q2.</strong> Solve 4x − 2 = 10 &nbsp; <em>(use the same steps)</em></p>
+            </div>
+            <div id="tc2" style="display:none">
+              <p style="font-size:12px;font-weight:700;color:#1D4ED8;margin-bottom:10px">Standard tier — independent practice, no scaffolding</p>
+              <p style="font-size:13px;color:#334155;margin-bottom:6px"><strong>Q1.</strong> Solve 5x − 7 = 18</p>
+              <p style="font-size:13px;color:#334155;margin-bottom:6px"><strong>Q2.</strong> Solve 3(x + 2) = 21</p>
+              <p style="font-size:13px;color:#334155;margin-bottom:6px"><strong>Q3.</strong> If 2x + 4 = x + 11, find x</p>
+              <p style="font-size:13px;color:#334155"><strong>Q4.</strong> A number is doubled and then 5 is added. The result is 17. Write and solve the equation.</p>
+            </div>
+            <div id="tc3" style="display:none">
+              <p style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:10px">Extension tier — multi-step reasoning and algebraic thinking</p>
+              <p style="font-size:13px;color:#334155;margin-bottom:6px"><strong>Q1.</strong> Solve 3(2x − 1) = 4x + 9 and verify your answer</p>
+              <p style="font-size:13px;color:#334155;margin-bottom:6px"><strong>Q2.</strong> The perimeter of a rectangle is 48 cm. Its length is 3 times its width. Find the dimensions.</p>
+              <p style="font-size:13px;color:#334155"><strong>Q3.</strong> Create your own two-step equation word problem, write the equation, solve it, and explain each step.</p>
+            </div>
+          </div>
+          <div class="art-diagram-caption" style="padding:6px 16px 12px">Same learning outcome — three different doors in. Nobody does easier maths, they just get a different starting point.</div>
+          <script>
+          function showTier(n){
+            [1,2,3].forEach(function(i){
+              document.getElementById('tc'+i).style.display=i===n?'block':'none';
+            });
+          }
+          </script>
         </div>
         <div class="annotation">
           <div class="ann-header"><div class="ann-icon">📚</div><div class="ann-label">Research Annotation</div></div>
@@ -662,33 +763,78 @@ cite{font-style:normal;color:var(--teal);font-weight:500}
         </div>
         <div class="art-tags"><span class="badge badge-ink">Formative Assessment</span><span class="badge badge-ink">Exit Tickets</span><span class="badge badge-ink">Kahoot</span><span class="badge badge-slate">Stage 6</span></div>
         <div class="art-body">This is a toolkit of five low-stakes formative assessment strategies I've designed to use in Stage 6 classes: diagnostic entrance tickets at the start of a lesson, mini-whiteboard responses mid-explanation, Kahoot quizzes, traffic light self-rating cards, and peer explanation protocols. I developed it during CRS514 in preparation for teaching Stage 6. Some of these I trialled in a limited way at Merrylands — the whiteboard check in particular was immediately useful — but this toolkit is designed with the Stage 6 context in mind, where the HSC creates pressure that can push teaching toward test practice at the expense of genuine understanding. <cite>Andersson and Palm (2023)</cite> give the strongest research case for why formative practice matters, particularly for students who are already behind.</div>
-        <div class="art-diagram">
-          <svg viewBox="0 0 680 240" xmlns="http://www.w3.org/2000/svg">
-            <rect x="20" y="20" width="118" height="54" rx="10" fill="#ECFCCB" stroke="#65A30D" stroke-width="1"/>
-            <text x="79" y="43" font-size="11.5" font-weight="600" fill="#3F6212" text-anchor="middle">Entrance</text>
-            <text x="79" y="61" font-size="10.5" fill="#3F6212" text-anchor="middle">tickets</text>
-            <rect x="148" y="20" width="118" height="54" rx="10" fill="#ECFCCB" stroke="#65A30D" stroke-width="1"/>
-            <text x="207" y="43" font-size="11.5" font-weight="600" fill="#3F6212" text-anchor="middle">Mini</text>
-            <text x="207" y="61" font-size="10.5" fill="#3F6212" text-anchor="middle">whiteboards</text>
-            <rect x="276" y="20" width="118" height="54" rx="10" fill="#ECFCCB" stroke="#65A30D" stroke-width="1"/>
-            <text x="335" y="43" font-size="11.5" font-weight="600" fill="#3F6212" text-anchor="middle">Kahoot</text>
-            <text x="335" y="61" font-size="10.5" fill="#3F6212" text-anchor="middle">quizzes</text>
-            <rect x="404" y="20" width="118" height="54" rx="10" fill="#ECFCCB" stroke="#65A30D" stroke-width="1"/>
-            <text x="463" y="43" font-size="11.5" font-weight="600" fill="#3F6212" text-anchor="middle">Traffic light</text>
-            <text x="463" y="61" font-size="10.5" fill="#3F6212" text-anchor="middle">self-rating</text>
-            <rect x="532" y="20" width="118" height="54" rx="10" fill="#ECFCCB" stroke="#65A30D" stroke-width="1"/>
-            <text x="591" y="43" font-size="11.5" font-weight="600" fill="#3F6212" text-anchor="middle">Peer</text>
-            <text x="591" y="61" font-size="10.5" fill="#3F6212" text-anchor="middle">explanation</text>
-            <line x1="79" y1="74" x2="320" y2="148" stroke="#94A3B8" stroke-width="1"/>
-            <line x1="207" y1="74" x2="330" y2="148" stroke="#94A3B8" stroke-width="1"/>
-            <line x1="335" y1="74" x2="340" y2="148" stroke="#94A3B8" stroke-width="1"/>
-            <line x1="463" y1="74" x2="350" y2="148" stroke="#94A3B8" stroke-width="1"/>
-            <line x1="591" y1="74" x2="360" y2="148" stroke="#94A3B8" stroke-width="1"/>
-            <rect x="220" y="148" width="240" height="58" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
-            <text x="340" y="172" font-size="13" font-weight="600" fill="#92400E" text-anchor="middle">Check understanding now</text>
-            <text x="340" y="190" font-size="11" fill="#92400E" text-anchor="middle">not at the end of the unit</text>
-          </svg>
-          <div class="art-diagram-caption">All five are low-stakes — they tell me who's lost in the next five minutes, not just after the exam</div>
+                <div class="art-diagram" style="padding:0;background:#F8FAFC;border-radius:10px;overflow:hidden">
+          <div style="padding:12px 16px 8px;background:#ECFCCB;border-bottom:1px solid #65A30D22">
+            <p style="font-size:11.5px;color:#3F6212;margin:0">🔄 Click any strategy card to flip it and see how + when to use it</p>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px;min-height:160px">
+            <div class="fc-wrap" onclick="flipCard(this)">
+              <div class="fc">
+                <div class="fc-front" style="background:#ECFCCB;border:1.5px solid #65A30D;border-radius:9px;padding:12px 6px;text-align:center;height:100%">
+                  <div style="font-size:22px;margin-bottom:6px">🎟️</div>
+                  <div style="font-size:11px;font-weight:700;color:#3F6212">Entrance Tickets</div>
+                </div>
+                <div class="fc-back" style="background:#3F6212;border-radius:9px;padding:10px 8px;color:#fff;height:100%;font-size:10.5px;line-height:1.5">
+                  <strong>When:</strong> First 3 min of lesson<br><strong>How:</strong> One question recapping prior lesson — reveals who consolidated and who needs re-teaching before you move on.
+                </div>
+              </div>
+            </div>
+            <div class="fc-wrap" onclick="flipCard(this)">
+              <div class="fc">
+                <div class="fc-front" style="background:#ECFCCB;border:1.5px solid #65A30D;border-radius:9px;padding:12px 6px;text-align:center;height:100%">
+                  <div style="font-size:22px;margin-bottom:6px">✏️</div>
+                  <div style="font-size:11px;font-weight:700;color:#3F6212">Mini Whiteboards</div>
+                </div>
+                <div class="fc-back" style="background:#3F6212;border-radius:9px;padding:10px 8px;color:#fff;height:100%;font-size:10.5px;line-height:1.5">
+                  <strong>When:</strong> Mid-explanation<br><strong>How:</strong> Everyone holds up answer simultaneously. You see the whole class at once — no hiding. Fastest way to catch confusion.
+                </div>
+              </div>
+            </div>
+            <div class="fc-wrap" onclick="flipCard(this)">
+              <div class="fc">
+                <div class="fc-front" style="background:#ECFCCB;border:1.5px solid #65A30D;border-radius:9px;padding:12px 6px;text-align:center;height:100%">
+                  <div style="font-size:22px;margin-bottom:6px">🎮</div>
+                  <div style="font-size:11px;font-weight:700;color:#3F6212">Kahoot</div>
+                </div>
+                <div class="fc-back" style="background:#3F6212;border-radius:9px;padding:10px 8px;color:#fff;height:100%;font-size:10.5px;line-height:1.5">
+                  <strong>When:</strong> End of topic<br><strong>How:</strong> Turn leaderboard OFF — use it for data, not competition. Which questions got &lt;50% right? Reteach those next lesson.
+                </div>
+              </div>
+            </div>
+            <div class="fc-wrap" onclick="flipCard(this)">
+              <div class="fc">
+                <div class="fc-front" style="background:#ECFCCB;border:1.5px solid #65A30D;border-radius:9px;padding:12px 6px;text-align:center;height:100%">
+                  <div style="font-size:22px;margin-bottom:6px">🚦</div>
+                  <div style="font-size:11px;font-weight:700;color:#3F6212">Traffic Lights</div>
+                </div>
+                <div class="fc-back" style="background:#3F6212;border-radius:9px;padding:10px 8px;color:#fff;height:100%;font-size:10.5px;line-height:1.5">
+                  <strong>When:</strong> Before independent work<br><strong>How:</strong> Green=confident, Orange=unsure, Red=lost. Pair greens with oranges. Pull reds for small-group before the task.
+                </div>
+              </div>
+            </div>
+            <div class="fc-wrap" onclick="flipCard(this)">
+              <div class="fc">
+                <div class="fc-front" style="background:#ECFCCB;border:1.5px solid #65A30D;border-radius:9px;padding:12px 6px;text-align:center;height:100%">
+                  <div style="font-size:22px;margin-bottom:6px">🗣️</div>
+                  <div style="font-size:11px;font-weight:700;color:#3F6212">Peer Explain</div>
+                </div>
+                <div class="fc-back" style="background:#3F6212;border-radius:9px;padding:10px 8px;color:#fff;height:100%;font-size:10.5px;line-height:1.5">
+                  <strong>When:</strong> After new concept<br><strong>How:</strong> "Explain this step to your partner without looking at your notes." If they can't explain it, they don't own it yet.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="art-diagram-caption" style="padding:6px 16px 12px">All five are low-stakes — they inform the next five minutes of teaching, not a grade</div>
+          <style>
+          .fc-wrap{perspective:600px;cursor:pointer;min-height:130px}
+          .fc{position:relative;transform-style:preserve-3d;transition:transform .45s;height:130px}
+          .fc-wrap.flipped .fc{transform:rotateY(180deg)}
+          .fc-front,.fc-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+          .fc-back{transform:rotateY(180deg)}
+          </style>
+          <script>
+          function flipCard(el){el.classList.toggle('flipped');}
+          </script>
         </div>
         <div class="annotation">
           <div class="ann-header"><div class="ann-icon">📚</div><div class="ann-label">Research Annotation</div></div>
@@ -723,30 +869,52 @@ cite{font-style:normal;color:var(--teal);font-weight:500}
         </div>
         <div class="art-tags"><span class="badge badge-ink">Feedback</span><span class="badge badge-ink">Marking Guide</span><span class="badge badge-slate">Year 12 Advanced</span><span class="badge badge-slate">Stage 6</span></div>
         <div class="art-body">I developed this marking guide template during CRS514 as a resource I intend to use when marking Year 12 Advanced trial examinations. Instead of just allocating marks, it includes a "common error" field and a "next step" prompt for each question — so when students get their paper back, they receive something they can actually act on before the HSC, not just a number. This is based on what <cite>Andersson and Palm (2023)</cite> call feed-forward feedback, and I already started applying the principle at Merrylands, though there in a Stage 5 context. The Stage 6 version of this is designed with the HSC timeline in mind — feedback that arrives in time to actually change something.</div>
-        <div class="art-diagram">
-          <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg">
-            <rect x="40" y="20" width="240" height="195" rx="16" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1"/>
-            <text x="60" y="46" font-size="14" font-weight="600" fill="#334155">Mark only</text>
-            <rect x="70" y="66" width="180" height="48" rx="8" fill="#fff" stroke="#94A3B8" stroke-width="1"/>
-            <text x="160" y="86" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">Question 3</text>
-            <text x="160" y="104" font-size="11" fill="#64748B" text-anchor="middle">4 / 7 marks</text>
-            <text x="68" y="150" font-size="11" fill="#94A3B8">Student knows they got</text>
-            <text x="68" y="168" font-size="11" fill="#94A3B8">4 out of 7. Nothing else.</text>
-            <rect x="400" y="20" width="240" height="195" rx="16" fill="#FFF1F2" stroke="#F43F5E" stroke-width="1"/>
-            <text x="420" y="46" font-size="14" font-weight="600" fill="#BE123C">Feed-forward guide</text>
-            <rect x="420" y="66" width="200" height="42" rx="8" fill="#fff" stroke="#F43F5E" stroke-width="1"/>
-            <text x="520" y="84" font-size="12" font-weight="600" fill="#BE123C" text-anchor="middle">Question 3 — 4/7</text>
-            <text x="520" y="100" font-size="10.5" fill="#64748B" text-anchor="middle">Marks allocated correctly</text>
-            <rect x="420" y="116" width="200" height="40" rx="8" fill="#fff" stroke="#F43F5E" stroke-width="1"/>
-            <text x="520" y="132" font-size="10.5" fill="#BE123C" text-anchor="middle">Common error: forgot to</text>
-            <text x="520" y="150" font-size="10.5" fill="#BE123C" text-anchor="middle">apply chain rule in step 3</text>
-            <rect x="420" y="164" width="200" height="38" rx="8" fill="#fff" stroke="#F43F5E" stroke-width="1"/>
-            <text x="520" y="182" font-size="10.5" fill="#BE123C" text-anchor="middle">Next step: redo Q3c using</text>
-            <text x="520" y="198" font-size="10.5" fill="#BE123C" text-anchor="middle">chain rule checklist</text>
-            <line x1="282" y1="118" x2="398" y2="118" stroke="#94A3B8" stroke-width="1.5"/>
-            <text x="298" y="110" font-size="10.5" fill="#64748B">add</text>
-          </svg>
-          <div class="art-diagram-caption">Students get the mark either way — the right-hand version gives them something to do with it before the HSC</div>
+                <div class="art-diagram" style="padding:0;background:#F8FAFC;border-radius:10px;overflow:hidden">
+          <div style="padding:12px 16px 8px;background:#FFF1F2;border-bottom:1px solid #F43F5E22">
+            <p style="font-size:11.5px;color:#BE123C;margin:0">👆 Toggle between mark-only and feed-forward to see the difference</p>
+          </div>
+          <div style="display:flex;border-bottom:1px solid #E2E8F0">
+            <button id="mg-btn1" onclick="showMG(1)" style="flex:1;padding:12px;background:#BE123C;color:#fff;border:none;cursor:pointer;font-weight:600;font-size:13px;border-radius:0;transition:.2s">Mark Only</button>
+            <button id="mg-btn2" onclick="showMG(2)" style="flex:1;padding:12px;background:#F8FAFC;color:#64748B;border:none;cursor:pointer;font-weight:600;font-size:13px;border-radius:0;transition:.2s">Feed-Forward ✦</button>
+          </div>
+          <div id="mg1" style="padding:20px;display:block">
+            <div style="background:#F1F5F9;border-radius:10px;padding:16px 20px">
+              <p style="font-size:13px;font-weight:700;color:#334155;margin-bottom:14px">Year 9 Linear Equations — Question 3</p>
+              <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px">
+                <div style="font-size:14px;color:#334155">Solve: 3(x + 4) = 27</div>
+                <div style="font-size:22px;font-weight:700;color:#BE123C;margin-left:auto">4/5 ✗</div>
+              </div>
+              <div style="font-size:12px;color:#94A3B8;margin-top:8px;font-style:italic">Student sees: a number. Nothing else.</div>
+            </div>
+          </div>
+          <div id="mg2" style="padding:20px;display:none">
+            <div style="background:#FFF1F2;border-radius:10px;padding:16px 20px;border-left:4px solid #BE123C">
+              <p style="font-size:13px;font-weight:700;color:#334155;margin-bottom:14px">Year 9 Linear Equations — Question 3</p>
+              <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+                <div style="font-size:14px;color:#334155">Solve: 3(x + 4) = 27</div>
+                <div style="font-size:22px;font-weight:700;color:#BE123C;margin-left:auto">4/5</div>
+              </div>
+              <div style="background:#fff;border-radius:8px;padding:12px 14px;margin-bottom:8px;border-left:3px solid #F59E0B">
+                <p style="font-size:11.5px;font-weight:700;color:#92400E;margin-bottom:4px">⚠ Common error</p>
+                <p style="font-size:12.5px;color:#334155;margin:0">You expanded 3(x + 4) as 3x + 4 instead of 3x + 12. Always multiply the bracket term by 3.</p>
+              </div>
+              <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #0EA5A0">
+                <p style="font-size:11.5px;font-weight:700;color:#0F6B66;margin-bottom:4px">→ Next step</p>
+                <p style="font-size:12.5px;color:#334155;margin:0">Redo Q3 using the expansion checklist. Then try Q4b — same skill, different numbers.</p>
+              </div>
+            </div>
+          </div>
+          <div class="art-diagram-caption" style="padding:6px 16px 12px">The mark is identical — the feed-forward version gives the student a clear action before the next test</div>
+          <script>
+          function showMG(n){
+            document.getElementById('mg1').style.display=n===1?'block':'none';
+            document.getElementById('mg2').style.display=n===2?'block':'none';
+            document.getElementById('mg-btn1').style.background=n===1?'#BE123C':'#F8FAFC';
+            document.getElementById('mg-btn1').style.color=n===1?'#fff':'#64748B';
+            document.getElementById('mg-btn2').style.background=n===2?'#BE123C':'#F8FAFC';
+            document.getElementById('mg-btn2').style.color=n===2?'#fff':'#64748B';
+          }
+          </script>
         </div>
         <div class="annotation">
           <div class="ann-header"><div class="ann-icon">📚</div><div class="ann-label">Research Annotation</div></div>
@@ -781,24 +949,88 @@ cite{font-style:normal;color:var(--teal);font-weight:500}
         </div>
         <div class="art-tags"><span class="badge badge-ink">Reflective Practice</span><span class="badge badge-ink">Mentor Feedback</span><span class="badge badge-rose">Merrylands HS</span><span class="badge badge-slate">Year 8 &amp; 9 · Stage 5</span></div>
         <div class="art-body">This is a selection of entries from the reflective journal I kept across my four weeks at Merrylands. I wrote entries as close to immediately after lessons as I could manage — not at the end of the day when the details had gone fuzzy. The entries cover Year 8 and Year 9 Mathematics classes and document specific moments: what happened in a lesson, what I'd change, what my mentor said. <cite>Li (2025)</cite> argues that reflection only produces professional growth when it's anchored to something real and specific, not a vague general impression, and the quality difference between my Week 1 entries and my Week 4 entries makes that point pretty clearly.</div>
-        <div class="art-diagram">
-          <svg viewBox="0 0 680 240" xmlns="http://www.w3.org/2000/svg">
-            <line x1="60" y1="190" x2="620" y2="190" stroke="#CBD5E1" stroke-width="1"/>
-            <rect x="60" y="130" width="132" height="52" rx="8" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1"/>
-            <text x="126" y="152" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">Week 1</text>
-            <text x="126" y="170" font-size="10.5" fill="#64748B" text-anchor="middle">"Lesson went okay"</text>
-            <rect x="228" y="100" width="132" height="52" rx="8" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1"/>
-            <text x="294" y="122" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">Week 2</text>
-            <text x="294" y="140" font-size="10.5" fill="#64748B" text-anchor="middle">Named what worked</text>
-            <rect x="396" y="64" width="132" height="52" rx="8" fill="#E0F7F6" stroke="#0EA5A0" stroke-width="1"/>
-            <text x="462" y="86" font-size="12" font-weight="600" fill="#0F6B66" text-anchor="middle">Week 3</text>
-            <text x="462" y="104" font-size="10.5" fill="#0F6B66" text-anchor="middle">Specific moments, why</text>
-            <rect x="488" y="24" width="132" height="52" rx="8" fill="#E0F7F6" stroke="#0EA5A0" stroke-width="1"/>
-            <text x="554" y="46" font-size="12" font-weight="600" fill="#0F6B66" text-anchor="middle">Week 4</text>
-            <text x="554" y="64" font-size="10.5" fill="#0F6B66" text-anchor="middle">Specific &amp; actionable</text>
-            <path d="M 126 130 L 294 100 L 462 64 L 554 24" fill="none" stroke="#0EA5A0" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.7"/>
-          </svg>
-          <div class="art-diagram-caption">The quality shift happened once my mentors started giving specific feedback — it gave the journal something real to respond to</div>
+                <div class="art-diagram" style="padding:0;background:#F8FAFC;border-radius:10px;overflow:hidden">
+          <div style="padding:12px 16px 8px;background:#EFF6FF;border-bottom:1px solid #3B82F622">
+            <p style="font-size:11.5px;color:#1D4ED8;margin:0">📓 Click each week to read an actual journal entry from placement</p>
+          </div>
+          <div style="padding:16px 20px 10px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:stretch;gap:0">
+              <div style="display:flex;flex-direction:column;align-items:center;margin-right:14px">
+                <div id="jw1" onclick="showJournal(1)" style="width:36px;height:36px;border-radius:50%;background:#E2E8F0;color:#64748B;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;flex-shrink:0">1</div>
+                <div style="width:2px;flex:1;background:#E2E8F0;min-height:12px;margin-top:4px"></div>
+              </div>
+              <div style="flex:1;padding-bottom:4px">
+                <button onclick="showJournal(1)" style="background:none;border:none;text-align:left;cursor:pointer;width:100%;padding:0">
+                  <div style="font-size:12.5px;font-weight:600;color:#94A3B8">Week 1 — vague, general</div>
+                  <div style="font-size:11.5px;color:#CBD5E1;font-style:italic">"Lesson went okay. Students seemed engaged."</div>
+                </button>
+              </div>
+            </div>
+            <div style="display:flex;align-items:stretch;gap:0">
+              <div style="display:flex;flex-direction:column;align-items:center;margin-right:14px">
+                <div id="jw2" onclick="showJournal(2)" style="width:36px;height:36px;border-radius:50%;background:#E2E8F0;color:#64748B;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;flex-shrink:0">2</div>
+                <div style="width:2px;flex:1;background:#E2E8F0;min-height:12px;margin-top:4px"></div>
+              </div>
+              <div style="flex:1;padding-bottom:4px">
+                <button onclick="showJournal(2)" style="background:none;border:none;text-align:left;cursor:pointer;width:100%;padding:0">
+                  <div style="font-size:12.5px;font-weight:600;color:#64748B">Week 2 — naming specific moments</div>
+                  <div style="font-size:11.5px;color:#94A3B8;font-style:italic">"The whiteboard check worked well..."</div>
+                </button>
+              </div>
+            </div>
+            <div style="display:flex;align-items:stretch;gap:0">
+              <div style="display:flex;flex-direction:column;align-items:center;margin-right:14px">
+                <div id="jw3" onclick="showJournal(3)" style="width:36px;height:36px;border-radius:50%;background:#E0F7F6;color:#0EA5A0;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;flex-shrink:0">3</div>
+                <div style="width:2px;flex:1;background:#E2E8F0;min-height:12px;margin-top:4px"></div>
+              </div>
+              <div style="flex:1;padding-bottom:4px">
+                <button onclick="showJournal(3)" style="background:none;border:none;text-align:left;cursor:pointer;width:100%;padding:0">
+                  <div style="font-size:12.5px;font-weight:600;color:#0EA5A0">Week 3 — specific and analytical</div>
+                  <div style="font-size:11.5px;color:#0EA5A0;font-style:italic">"Three students stalled at Q3b..."</div>
+                </button>
+              </div>
+            </div>
+            <div style="display:flex;align-items:stretch;gap:0">
+              <div style="display:flex;flex-direction:column;align-items:center;margin-right:14px">
+                <div id="jw4" onclick="showJournal(4)" style="width:36px;height:36px;border-radius:50%;background:#0EA5A0;color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;flex-shrink:0">4</div>
+              </div>
+              <div style="flex:1">
+                <button onclick="showJournal(4)" style="background:none;border:none;text-align:left;cursor:pointer;width:100%;padding:0">
+                  <div style="font-size:12.5px;font-weight:600;color:#0F6B66">Week 4 — specific and actionable</div>
+                  <div style="font-size:11.5px;color:#0F6B66;font-style:italic">"Next time I'd scaffold the language..."</div>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div id="journal-entry" style="display:none;margin:0 16px 14px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;padding:14px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span id="je-week" style="font-size:11.5px;font-weight:700;color:#1D4ED8;text-transform:uppercase;letter-spacing:.06em"></span>
+              <button onclick="document.getElementById('journal-entry').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:15px;color:#94A3B8">✕</button>
+            </div>
+            <p id="je-text" style="font-size:13px;color:#334155;line-height:1.75;margin:0;font-style:italic"></p>
+          </div>
+          <div class="art-diagram-caption" style="padding:6px 16px 12px">The quality shift happened in Week 3, once my mentor started asking "why do you think that happened?"</div>
+          <script>
+          (function(){
+            var entries={
+              1:{w:"Week 1 — 14 May 2026",t:"Taught the intro lesson on linear equations to 9Maths5. Lesson went okay. Students seemed engaged for the most part. Used the PowerPoint and a worksheet. Will try to improve next time."},
+              2:{w:"Week 2 — 21 May 2026",t:"The mini-whiteboard check worked well today — I could see who was lost before I moved on, which I haven't been able to do before. Five students had the same error on expanding brackets. Still not sure how to adjust for the EAL/D students at the back who aren't participating much."},
+              3:{w:"Week 3 — 28 May 2026",t:"Three students stalled at Q3b on the tiered worksheet — the scaffolded version was missing a clear example for expanding brackets before solving. My mentor pointed this out after the lesson. The jump between tier 1 and tier 2 was too big. I revised the worksheet that evening and tested the revised version the next day. It worked considerably better."},
+              4:{w:"Week 4 — 4 June 2026",t:"Reflection after today: next time I teach linear equations to a class with this many EAL/D students, I'd scaffold the language of the word problems separately before the maths. Two students understood the algebra when I wrote it symbolically but couldn't extract the equation from the written question. That's a reading comprehension issue, not a maths one, and I should have anticipated it. Action: add a 'translate the sentence' step to the extension tier."}
+            };
+            window.showJournal=function(n){
+              var e=entries[n];
+              document.getElementById('je-week').textContent=e.w;
+              document.getElementById('je-text').textContent='“'+e.t+'”';
+              document.getElementById('journal-entry').style.display='block';
+              [1,2,3,4].forEach(function(i){
+                var el=document.getElementById('jw'+i);
+                el.style.background=i===n?'#0EA5A0':(i<n?'#E0F7F6':'#E2E8F0');
+                el.style.color=i===n?'#fff':(i<n?'#0EA5A0':'#64748B');
+              });
+            };
+          })();
+          </script>
         </div>
         <div class="annotation">
           <div class="ann-header"><div class="ann-icon">📚</div><div class="ann-label">Research Annotation</div></div>
@@ -1050,7 +1282,7 @@ cite{font-style:normal;color:var(--teal);font-weight:500}
   <div class="banner">
     <div class="banner-eyebrow">📚 Academic Sources</div>
     <h2>References</h2>
-    <p class="banner-sub">Complete reference list — APA 7th Edition — all DOIs are clickable</p>
+    <p class="banner-sub">Complete reference list — APA 7th Edition — all DOIs verified and clickable</p>
   </div>
   <div class="content">
     <button class="back-btn" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back to Home</button>
